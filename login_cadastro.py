@@ -1,93 +1,87 @@
 import tkinter as tk
 from tkinter import messagebox
-from banca import ProfessorController, BancaView  # Importa o Controller e a tela de Banca
+from controllers.usuario_controller import UsuarioController
+from banca import ProfessorController, BancaView
 
-class LoginView:
-    def __init__(self, root, controller):
+class LoginCadastroView:
+    def __init__(self, root, usuario_controller):
+        """
+        Inicializa a interface de login e cadastro.
+        """
         self.root = root
-        self.controller = controller
-        self.root.title("Tela de Login")
-        self.root.geometry("400x300")
-        
-        # Campos de entrada para login
-        tk.Label(self.root, text="SIAPE:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
-        self.siape_entry = tk.Entry(self.root, width=40)
-        self.siape_entry.grid(row=0, column=1, padx=10, pady=5)
+        self.root.title("Login e Cadastro de Usuários")
+        self.usuario_controller = usuario_controller
 
-        tk.Label(self.root, text="Senha:").grid(row=1, column=0, sticky="w", padx=10, pady=5)
-        self.senha_entry = tk.Entry(self.root, width=40, show="*")
-        self.senha_entry.grid(row=1, column=1, padx=10, pady=5)
+        # Widgets para login
+        tk.Label(root, text="Email:").grid(row=0, column=0, pady=5)
+        self.email_entry = tk.Entry(root, width=30)
+        self.email_entry.grid(row=0, column=1)
 
-        # Botões de Login e Cadastro
-        self.login_button = tk.Button(self.root, text="Login", command=self.realizar_login)
-        self.login_button.grid(row=2, column=0, columnspan=2, pady=10)
+        tk.Label(root, text="Senha:").grid(row=1, column=0, pady=5)
+        self.senha_entry = tk.Entry(root, show="*", width=30)
+        self.senha_entry.grid(row=1, column=1)
 
-        self.cadastrar_button = tk.Button(self.root, text="Cadastrar", command=self.abrir_cadastro)
-        self.cadastrar_button.grid(row=3, column=0, columnspan=2, pady=10)
+        # Botões
+        tk.Button(root, text="Login", command=self.realizar_login, width=15).grid(row=2, column=0, pady=10)
+        tk.Button(root, text="Cadastrar", command=self.abrir_tela_cadastro, width=15).grid(row=2, column=1, pady=10)
 
     def realizar_login(self):
-        siape = self.siape_entry.get()
+        """
+        Realiza a autenticação do usuário.
+        """
+        email = self.email_entry.get()
         senha = self.senha_entry.get()
 
-        if not siape or not senha:
-            messagebox.showerror("Erro", "Todos os campos devem ser preenchidos!")
-            return
-
-        if self.controller.autenticar_professor(siape, senha):
-            messagebox.showinfo("Sucesso", "Login realizado com sucesso!")
-            self.root.destroy()  
-            self.abrir_tela_banca()  # Abre a tela de cadastro de bancas
+        if email and senha:
+            autenticado = self.usuario_controller.autenticar_usuario(email, senha)
+            if autenticado:
+                messagebox.showinfo("Sucesso", "Login realizado com sucesso!")
+                self.abrir_tela_banca()  # Redireciona para a tela de cadastro de banca
+            else:
+                messagebox.showerror("Erro", "Email ou senha inválidos!")
         else:
-            messagebox.showerror("Erro", "SIAPE ou senha incorretos!")
-
-    def abrir_cadastro(self):
-        self.root.destroy()
-        cadastro_view = CadastroView(tk.Tk(), self.controller)  # Abre a tela de cadastro
-        cadastro_view.root.mainloop()
+            messagebox.showwarning("Erro", "Preencha todos os campos!")
 
     def abrir_tela_banca(self):
-        janela_banca = tk.Tk()
-        banca_view = BancaView(janela_banca, self.controller)  # Passa o controller para a tela de bancas
-        janela_banca.mainloop()
+        """
+        Abre a tela de cadastro de banca após o login.
+        """
+        banca_window = tk.Toplevel(self.root)  # Cria uma nova janela
+        banca_controller = ProfessorController()  # Criando o controller para a banca
+        BancaView(banca_window, banca_controller)  # Passa a nova janela e o controller para a BancaView
 
-class CadastroView:
-    def __init__(self, root, controller):
-        self.root = root
-        self.controller = controller
-        self.root.title("Tela de Cadastro")
-        self.root.geometry("400x300")
-        
-        tk.Label(self.root, text="SIAPE:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
-        self.siape_entry = tk.Entry(self.root, width=40)
-        self.siape_entry.grid(row=0, column=1, padx=10, pady=5)
+    def abrir_tela_cadastro(self):
+        """
+        Abre uma nova janela para cadastro de usuários.
+        """
+        cadastro_window = tk.Toplevel(self.root)
+        cadastro_window.title("Cadastro de Usuário")
 
-        tk.Label(self.root, text="Senha:").grid(row=1, column=0, sticky="w", padx=10, pady=5)
-        self.senha_entry = tk.Entry(self.root, width=40, show="*")
-        self.senha_entry.grid(row=1, column=1, padx=10, pady=5)
+        tk.Label(cadastro_window, text="Nome:").grid(row=0, column=0, pady=5)
+        nome_entry = tk.Entry(cadastro_window, width=30)
+        nome_entry.grid(row=0, column=1)
 
-        self.cadastrar_button = tk.Button(self.root, text="Cadastrar", command=self.realizar_cadastro)
-        self.cadastrar_button.grid(row=2, column=0, columnspan=2, pady=10)
+        tk.Label(cadastro_window, text="Email:").grid(row=1, column=0, pady=5)
+        email_entry = tk.Entry(cadastro_window, width=30)
+        email_entry.grid(row=1, column=1)
 
-    def realizar_cadastro(self):
-        siape = self.siape_entry.get()
-        senha = self.senha_entry.get()
+        tk.Label(cadastro_window, text="Senha:").grid(row=2, column=0, pady=5)
+        senha_entry = tk.Entry(cadastro_window, show="*", width=30)
+        senha_entry.grid(row=2, column=1)
 
-        if not siape or not senha:
-            messagebox.showerror("Erro", "Todos os campos devem ser preenchidos!")
-            return
+        def cadastrar_usuario():
+            """
+            Registra um novo usuário.
+            """
+            nome = nome_entry.get()
+            email = email_entry.get()
+            senha = senha_entry.get()
 
-        if self.controller.existe_professor(siape):
-            messagebox.showerror("Erro", "SIAPE já cadastrado!")
-            return
+            if nome and email and senha:
+                mensagem = self.usuario_controller.cadastrar_usuario(nome, email, senha)
+                messagebox.showinfo("Cadastro", mensagem)
+                cadastro_window.destroy()
+            else:
+                messagebox.showwarning("Erro", "Preencha todos os campos!")
 
-        self.controller.cadastrar_professor(siape, senha)
-        messagebox.showinfo("Sucesso", "Cadastro realizado com sucesso!")
-        self.root.destroy()
-        login_view = LoginView(tk.Tk(), self.controller)  
-        login_view.root.mainloop()
-
-# Inicia a aplicação
-if __name__ == "__main__":
-    controller = ProfessorController()
-    login_view = LoginView(tk.Tk(), controller)
-    login_view.root.mainloop()
+        tk.Button(cadastro_window, text="Cadastrar", command=cadastrar_usuario, width=15).grid(row=3, column=0, columnspan=2, pady=10)

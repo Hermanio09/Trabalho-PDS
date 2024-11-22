@@ -1,6 +1,7 @@
 from models.banca_model import BancaModel
 from models.professor_model import ProfessorModel
 
+
 class BancaController:
     def __init__(self):
         """Inicializa os modelos de Banca e Professor."""
@@ -18,14 +19,16 @@ class BancaController:
 
     def editar_banca(self, index, aluno_nome, orientador_nome, titulo, data):
         """Edita os detalhes de uma banca."""
-        if 0 <= index < len(self.obter_bancas()):
+        bancas = self.obter_bancas()
+        if 0 <= index < len(bancas):
             self.banca_model.editar_banca(index, aluno_nome, orientador_nome, titulo, data)
         else:
             raise IndexError("Índice de banca inválido.")
 
     def remover_banca(self, index):
         """Remove uma banca pelo índice."""
-        if 0 <= index < len(self.obter_bancas()):
+        bancas = self.obter_bancas()
+        if 0 <= index < len(bancas):
             self.banca_model.remover_banca(index)
         else:
             raise IndexError("Índice de banca inválido.")
@@ -37,7 +40,9 @@ class BancaController:
         """
         bancas = self.obter_bancas()
         return [
-            banca for banca in bancas if termo.lower() in banca["aluno_nome"].lower()
+            banca
+            for banca in bancas
+            if termo.lower() in banca["aluno_nome"].lower()
             or termo.lower() in banca["orientador_nome"].lower()
             or termo.lower() in banca["titulo"].lower()
         ]

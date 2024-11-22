@@ -1,8 +1,11 @@
 import tkinter as tk
-from login_cadastro import LoginView
-from banca import ProfessorController
+from login_cadastro import LoginCadastroView
+from controllers.usuario_controller import UsuarioController
 
 if __name__ == "__main__":
-    controller = ProfessorController()
-    login_view = LoginView(tk.Tk(), controller)
-    login_view.root.mainloop()
+    usuario_controller = UsuarioController()
+
+    root = tk.Tk()
+    app = LoginCadastroView(root, usuario_controller)
+
+    root.mainloop()
